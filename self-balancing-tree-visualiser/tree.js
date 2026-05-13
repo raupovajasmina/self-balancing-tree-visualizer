@@ -629,29 +629,35 @@ class AVLTree {
     this.root = this._insert(this.root, val, steps); return steps;
   }
   minNode(n) { while (n.left) n = n.left; return n; }
-  _delete(n, val, steps) {
-    if (!n) return null;
-    steps.push({ type: 'visit', desc: `Checking ${n.val}`, highlight: [n.id], kind: 'path' });
-    if (val < n.val)      n.left  = this._delete(n.left,  val, steps);
-    else if (val > n.val) n.right = this._delete(n.right, val, steps);
-    else {
-      steps.push({ type: 'delete', desc: `Found ${val} — removing`, highlight: [n.id], kind: 'delete' });
-      if (!n.left || !n.right) {
-        n = n.left || n.right;
-        if (n) steps.push({ type: 'info', desc: `Promoted child ${n.val}`, highlight: [n.id], kind: 'new' });
-      } else {
-        let succ = this.minNode(n.right);
-        steps.push({ type: 'info', desc: `In-order successor: ${succ.val}`, highlight: [succ.id], kind: 'highlight' });
-        n.val = succ.val; n.right = this._delete(n.right, succ.val, steps);
-      }
+  _delete(n, val, steps, found) {
+  if (!n) return null;
+  steps.push({ type: 'visit', desc: `Checking ${n.val}`, highlight: [n.id], kind: 'path' });
+  if (val < n.val)      n.left  = this._delete(n.left,  val, steps, found);
+  else if (val > n.val) n.right = this._delete(n.right, val, steps, found);
+  else {
+    found.hit = true;  // ← buraya ekle
+    steps.push({ type: 'delete', desc: `Found ${val} — removing`, highlight: [n.id], kind: 'delete' });
+    if (!n.left || !n.right) {
+      n = n.left || n.right;
+      if (n) steps.push({ type: 'info', desc: `Promoted child ${n.val}`, highlight: [n.id], kind: 'new' });
+    } else {
+      let succ = this.minNode(n.right);
+      steps.push({ type: 'info', desc: `Successor: ${succ.val}`, highlight: [succ.id], kind: 'highlight' });
+      n.val = succ.val; n.right = this._delete(n.right, succ.val, steps, found);
     }
-    if (!n) return null;
-    return this.balance(n, steps);
   }
+  if (!n) return null;
+  return this.balance(n, steps);
+}
   delete(val) {
-    let steps = [{ type: 'info', desc: `Deleting ${val} from AVL Tree`, highlight: [], kind: 'info' }];
-    this.root = this._delete(this.root, val, steps); return steps;
+  let steps = [{ type: 'info', desc: `Deleting ${val} from AVL Tree`, highlight: [], kind: 'info' }];
+  let found = { hit: false };
+  this.root = this._delete(this.root, val, steps, found);
+  if (!found.hit) {
+    steps.push({ type: 'info', desc: `${val} not found in tree`, highlight: [], kind: 'info' });
   }
+  return steps;
+}
   _search(n, val, steps) {
     if (!n) { steps.push({ type: 'info', desc: `${val} not found`, highlight: [], kind: 'info' }); return; }
     steps.push({ type: 'visit', desc: `Visiting ${n.val}`, highlight: [n.id], kind: 'path' });

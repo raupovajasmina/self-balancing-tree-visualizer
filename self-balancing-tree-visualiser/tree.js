@@ -586,6 +586,7 @@ class AVLTree {
     n.height = 1 + Math.max(this.height(n.left), this.height(n.right));
     n.bf = this.bf(n);
   }
+  
   rotateRight(y, steps) {
     let x = y.left, T2 = x.right;
     steps.push({ type: 'rotate', desc: `Right rotation on ${y.val}`, highlight: [y.id, x.id], kind: 'rotate' });
@@ -601,53 +602,149 @@ class AVLTree {
     metrics.rotations++; return y;
   }
   balance(n, steps) {
-    this.update(n);
-    if (n.bf > 1) {
-      if (this.bf(n.left) < 0) { steps.push({ type: 'rotate', desc: `LR case at ${n.val}`, highlight: [n.id], kind: 'rotate' }); n.left = this.rotateLeft(n.left, steps); }
-      return this.rotateRight(n, steps);
-    }
-    if (n.bf < -1) {
-      if (this.bf(n.right) > 0) { steps.push({ type: 'rotate', desc: `RL case at ${n.val}`, highlight: [n.id], kind: 'rotate' }); n.right = this.rotateRight(n.right, steps); }
-      return this.rotateLeft(n, steps);
-    }
-    return n;
-  }
-  _insert(n, val, steps) {
-    if (!n) {
-      let node = new AVLNode(val);
-      steps.push({ type: 'insert', desc: `Inserted ${val}`, highlight: [node.id], kind: 'new', node });
-      return node;
-    }
-    steps.push({ type: 'visit', desc: `Compare ${val} with ${n.val}`, highlight: [n.id], kind: 'path' });
-    if (val < n.val)      n.left  = this._insert(n.left,  val, steps);
-    else if (val > n.val) n.right = this._insert(n.right, val, steps);
-    else { steps.push({ type: 'info', desc: `${val} already exists`, highlight: [n.id], kind: 'found' }); return n; }
-    return this.balance(n, steps);
-  }
-  insert(val) {
-    let steps = [{ type: 'info', desc: `Inserting ${val} into AVL Tree`, highlight: [], kind: 'info' }];
-    this.root = this._insert(this.root, val, steps); return steps;
-  }
-  minNode(n) { while (n.left) n = n.left; return n; }
-  _delete(n, val, steps, found) {
-  if (!n) return null;
-  steps.push({ type: 'visit', desc: `Checking ${n.val}`, highlight: [n.id], kind: 'path' });
-  if (val < n.val)      n.left  = this._delete(n.left,  val, steps, found);
-  else if (val > n.val) n.right = this._delete(n.right, val, steps, found);
-  else {
-    found.hit = true;  // ← buraya ekle
-    steps.push({ type: 'delete', desc: `Found ${val} — removing`, highlight: [n.id], kind: 'delete' });
-    if (!n.left || !n.right) {
-      n = n.left || n.right;
-      if (n) steps.push({ type: 'info', desc: `Promoted child ${n.val}`, highlight: [n.id], kind: 'new' });
+  this.update(n);
+
+  if (n.bf > 1) {
+    const leftBf = this.bf(n.left);
+    if (leftBf >= 0) {
+      // LL Case
+      steps.push({
+    type:'rotate',
+    desc:'Dengesiz ağaç tespit edildi',
+    highlight:[n.id],
+    kind:'rotate',
+    avlSnapshot:serializeAVL(this.root)
+});
+      steps.push({ type:'rotate', desc:`⚠️ LL Durumu — ${n.val} sol ağırlıklı (BF=${n.bf}), tek sağ rotasyon uygulanacak`, highlight:[n.id, n.left?.id].filter(Boolean), kind:'rotate' });
+      const result = this.rotateRight(n, steps);
+      steps.push({ type:'rotate', desc:`✓ LL Rotasyonu tamamlandı — ${result.val} yeni üst düğüm`, highlight:[result.id], kind:'new' });
+      return result;
     } else {
-      let succ = this.minNode(n.right);
-      steps.push({ type: 'info', desc: `Successor: ${succ.val}`, highlight: [succ.id], kind: 'highlight' });
-      n.val = succ.val; n.right = this._delete(n.right, succ.val, steps, found);
+      // LR Case
+      steps.push({
+    type:'rotate',
+    desc:'Dengesiz ağaç tespit edildi',
+    highlight:[n.id],
+    kind:'rotate',
+    avlSnapshot:serializeAVL(this.root)
+});
+      steps.push({ type:'rotate', desc:`⚠️ LR Durumu — ${n.val} sol ağırlıklı, sol çocuk sağ ağırlıklı — çift rotasyon`, highlight:[n.id, n.left?.id].filter(Boolean), kind:'rotate' });
+      steps.push({ type:'rotate', desc:`LR Adım 1/2 — ${n.left.val} üzerinde sol rotasyon`, highlight:[n.left?.id].filter(Boolean), kind:'rotate' });
+      n.left = this.rotateLeft(n.left, steps);
+      steps.push({ type:'rotate', desc:`LR Adım 2/2 — ${n.val} üzerinde sağ rotasyon`, highlight:[n.id], kind:'rotate' });
+      const result = this.rotateRight(n, steps);
+      steps.push({ type:'rotate', desc:`✓ LR Rotasyonu tamamlandı — ${result.val} yeni üst düğüm`, highlight:[result.id], kind:'new' });
+      return result;
     }
   }
-  if (!n) return null;
-  return this.balance(n, steps);
+
+  if (n.bf < -1) {
+    const rightBf = this.bf(n.right);
+    if (rightBf <= 0) {
+      // RR Case
+      steps.push({
+    type:'rotate',
+    desc:'Dengesiz ağaç tespit edildi',
+    highlight:[n.id],
+    kind:'rotate',
+    avlSnapshot:serializeAVL(this.root)
+});
+      steps.push({ type:'rotate', desc:`⚠️ RR Durumu — ${n.val} sağ ağırlıklı (BF=${n.bf}), tek sol rotasyon uygulanacak`, highlight:[n.id, n.right?.id].filter(Boolean), kind:'rotate' });
+      const result = this.rotateLeft(n, steps);
+      steps.push({ type:'rotate', desc:`✓ RR Rotasyonu tamamlandı — ${result.val} yeni üst düğüm`, highlight:[result.id], kind:'new' });
+      return result;
+    } else {
+      // RL Case
+      steps.push({
+    type:'rotate',
+    desc:'Dengesiz ağaç tespit edildi',
+    highlight:[n.id],
+    kind:'rotate',
+    avlSnapshot:serializeAVL(this.root)
+});
+      steps.push({ type:'rotate', desc:`⚠️ RL Durumu — ${n.val} sağ ağırlıklı, sağ çocuk sol ağırlıklı — çift rotasyon`, highlight:[n.id, n.right?.id].filter(Boolean), kind:'rotate' });
+      steps.push({ type:'rotate', desc:`RL Adım 1/2 — ${n.right.val} üzerinde sağ rotasyon`, highlight:[n.right?.id].filter(Boolean), kind:'rotate' });
+      n.right = this.rotateRight(n.right, steps);
+      steps.push({ type:'rotate', desc:`RL Adım 2/2 — ${n.val} üzerinde sol rotasyon`, highlight:[n.id], kind:'rotate' });
+      const result = this.rotateLeft(n, steps);
+      steps.push({ type:'rotate', desc:`✓ RL Rotasyonu tamamlandı — ${result.val} yeni üst düğüm`, highlight:[result.id], kind:'new' });
+      return result;
+    }
+  }
+
+  return n;
+}
+_insert(n, val, steps) {
+
+    // yeni düğüm
+    if (!n) {
+        const node = new AVLNode(val);
+
+        steps.push({
+            type:'insert',
+            desc:`${val} eklendi`,
+            highlight:[node.id],
+            kind:'new'
+        });
+
+        return node;
+    }
+
+    // ağacın içinde ilerleme
+    steps.push({
+        type:'visit',
+        desc:`${val} ile ${n.val} karşılaştırılıyor`,
+        highlight:[n.id],
+        kind:'path'
+    });
+
+    if (val < n.val) {
+        n.left = this._insert(n.left,val,steps);
+
+    } else if (val > n.val) {
+        n.right = this._insert(n.right,val,steps);
+
+    } else {
+
+        steps.push({
+            type:'info',
+            desc:`${val} zaten mevcut`,
+            highlight:[n.id],
+            kind:'found'
+        });
+
+        return n;
+    }
+
+    // yükseklik güncelle
+    this.update(n);
+
+    steps.push({
+        type:'info',
+        desc:`Node ${n.val} BF=${n.bf}`,
+        highlight:[n.id],
+        kind:'info'
+    });
+
+    // ASIL DENGELEME
+    return this.balance(n,steps);
+}
+insert(val){
+
+    const steps=[{
+        type:'info',
+        desc:`${val} AVL ağacına ekleniyor`,
+        highlight:[],
+        kind:'info'
+    }];
+
+    this.root=this._insert(
+        this.root,
+        val,
+        steps
+    );
+
+    return steps;
 }
   delete(val) {
   let steps = [{ type: 'info', desc: `Deleting ${val} from AVL Tree`, highlight: [], kind: 'info' }];
@@ -1384,7 +1481,16 @@ function applyStep(step) {
   if (!step) return;
   let hlMap = new Map();
   (step.highlight || []).forEach(id => { if (id) hlMap.set(id, step.kind || 'path'); });
-  render(hlMap);
+
+  if ('avlSnapshot' in step) {
+    const savedRoot = trees.avl.root;
+    trees.avl.root = step.avlSnapshot ? deserializeAVL(step.avlSnapshot) : null;
+    render(hlMap);
+    trees.avl.root = savedRoot;
+  } else {
+    render(hlMap);
+  }
+
   showStepOverlay(step);
   logStep(step);
   if (activeRightPanel === 'pseudo') highlightPseudoLines(step.kind || 'info');
@@ -1469,6 +1575,8 @@ function switchTree(type) {
   metrics = { rotations: 0, ops: 0 }; isFirstRender = true;
   updateStepIndicator(); hideStepOverlay(); render(new Map()); updateLegend();
   document.getElementById('traversal-result').style.display = 'none';
+  const rotSection = document.getElementById('rotation-demo-section');
+if (rotSection) rotSection.style.display = type === 'avl' ? 'block' : 'none';
   addLog(`Switched to ${type === 'avl' ? 'AVL Tree' : type === 'rb' ? 'Red-Black Tree' : 'B-Tree'}`, 'info');
   if (activeRightPanel === 'pseudo') { currentHighlightedLines = new Set(); renderPseudoCode(type); }
   if (activeRightPanel === 'bigo') renderBigO(type);
@@ -1744,6 +1852,97 @@ function showToast(msg) {
   toast.textContent = msg;
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 2100);
+}
+// ============================================================
+// RAW BST INSERT (dengesiz ara durum göstermek için)
+// ============================================================
+function rawBSTInsertAVL(n, val) {
+  if (!n) { let node = new AVLNode(val); node.height = 1; node.bf = 0; return node; }
+  if (val < n.val)      n.left  = rawBSTInsertAVL(n.left,  val);
+  else if (val > n.val) n.right = rawBSTInsertAVL(n.right, val);
+  n.height = 1 + Math.max(n.left ? n.left.height : 0, n.right ? n.right.height : 0);
+  n.bf = (n.left ? n.left.height : 0) - (n.right ? n.right.height : 0);
+  return n;
+}
+
+// ============================================================
+// AVL ROTATION DEMO
+// ============================================================
+function demoRotation(type) {
+  if (currentTree !== 'avl') switchTree('avl');
+
+  const demos = {
+    'LL': { vals:[30,20,10], name:'Sol-Sol (LL)', desc:'30 → 20 → 10: sol-sol ağırlık, tek sağ rotasyon' },
+    'RR': { vals:[10,20,30], name:'Sağ-Sağ (RR)', desc:'10 → 20 → 30: sağ-sağ ağırlık, tek sol rotasyon' },
+    'LR': { vals:[30,10,20], name:'Sol-Sağ (LR)', desc:'30 → 10 → 20: sol-sağ ağırlık, çift rotasyon' },
+    'RL': { vals:[10,30,20], name:'Sağ-Sol (RL)', desc:'10 → 30 → 20: sağ-sol ağırlık, çift rotasyon' },
+  };
+
+  const demo = demos[type];
+  const vals = demo.vals;
+  let allSteps = [];
+
+  allSteps.push({
+    type:'info', desc:`🎬 ${demo.name} Demo — ${demo.desc}`,
+    highlight:[], kind:'info', avlSnapshot: null
+  });
+
+  for (let i = 0; i < vals.length; i++) {
+    // Ekleme öncesi durum
+    let tBefore = new AVLTree();
+    for (let j = 0; j < i; j++) tBefore.insert(vals[j]);
+
+    allSteps.push({
+      type:'insert',
+      desc:`Adım ${i+1}/${vals.length}: ${vals[i]} ekleniyor${i===vals.length-1?' ← rotasyon burada tetiklenecek':''}`,
+      highlight:[], kind: i===vals.length-1 ? 'path' : 'new',
+      avlSnapshot: serializeAVL(tBefore.root)
+    });
+
+    if (i === vals.length - 1) {
+      // Dengesiz ara durum (ham BST insert, balance yok)
+      let tUnbal = new AVLTree();
+      for (let j = 0; j < i; j++) tUnbal.insert(vals[j]);
+      tUnbal.root = rawBSTInsertAVL(tUnbal.root, vals[i]);
+
+      allSteps.push({
+        type:'rotate',
+        desc:`⚠️ ${type} Dengesizliği oluştu — denge faktörü sınırı aşıldı`,
+        highlight:[], kind:'rotate',
+        avlSnapshot: serializeAVL(tUnbal.root)
+      });
+
+      // Rotasyon sonrası dengeli durum
+      let tAfter = new AVLTree();
+      for (let j = 0; j <= i; j++) tAfter.insert(vals[j]);
+
+      allSteps.push({
+        type:'rotate',
+        desc:`✓ ${demo.name} Rotasyonu tamamlandı — ağaç yeniden dengeli`,
+        highlight:[], kind:'found',
+        avlSnapshot: serializeAVL(tAfter.root)
+      });
+    } else {
+      let tAfter = new AVLTree();
+      for (let j = 0; j <= i; j++) tAfter.insert(vals[j]);
+      allSteps.push({
+        type:'insert', desc:`${vals[i]} eklendi — ağaç dengeli`,
+        highlight:[], kind:'new',
+        avlSnapshot: serializeAVL(tAfter.root)
+      });
+    }
+  }
+
+  // Asıl tree'yi son duruma getir
+  trees.avl = new AVLTree();
+  for (let v of vals) { trees.avl.insert(v); metrics.ops++; }
+  isFirstRender = false;
+
+  addLog(`Demo: ${demo.name} [${vals.join(' → ')}]`, 'rotate');
+  addToHistoryLog('insert', `${type} Demo`);
+
+  stopPlay(); stepQueue = allSteps; stepIndex = -1;
+  updateStepIndicator(); togglePlay();
 }
 // ── Init ──
 initAuth();

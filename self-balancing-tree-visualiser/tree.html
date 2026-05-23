@@ -119,15 +119,28 @@
         </div>
       </div>
     </div>
-<!-- AVL Rotation Demo -->
+<!-- AVL Rotation -->
 <div class="sidebar-section" id="rotation-demo-section">
-  <h3>AVL Rotasyon Demo</h3>
-  <div class="quick-btns">
-    <button class="quick-btn rot-demo-btn" onclick="demoRotation('LL')" title="Sol-Sol: 30→20→10">LL</button>
-    <button class="quick-btn rot-demo-btn" onclick="demoRotation('RR')" title="Sağ-Sağ: 10→20→30">RR</button>
-    <button class="quick-btn rot-demo-btn" onclick="demoRotation('LR')" title="Sol-Sağ: 30→10→20">LR</button>
-    <button class="quick-btn rot-demo-btn" onclick="demoRotation('RL')" title="Sağ-Sol: 10→30→20">RL</button>
+  <h3>AVL Rotation</h3>
+  <div class="rotation-grid">
+    <button class="rot-btn" onclick="applyRotation('LL')">
+      <span class="rot-btn-type">LL</span>
+      <span class="rot-btn-sub">Right rotate</span>
+    </button>
+    <button class="rot-btn" onclick="applyRotation('RR')">
+      <span class="rot-btn-type">RR</span>
+      <span class="rot-btn-sub">Left rotate</span>
+    </button>
+    <button class="rot-btn" onclick="applyRotation('LR')">
+      <span class="rot-btn-type">LR</span>
+      <span class="rot-btn-sub">Left→Right</span>
+    </button>
+    <button class="rot-btn" onclick="applyRotation('RL')">
+      <span class="rot-btn-type">RL</span>
+      <span class="rot-btn-sub">Right→Left</span>
+    </button>
   </div>
+  <div class="rot-status" id="rot-status"></div>
 </div>
     <!-- Traversal -->
     <div class="sidebar-section">
@@ -152,7 +165,7 @@
         <button class="btn btn-secondary" id="play-btn" onclick="togglePlay()" title="Play/Pause (Space)">▶</button>
         <button class="btn btn-secondary" onclick="stepForward()" title="Forward (→)">▶▶</button>
       </div>
-      <div class="step-indicator" id="step-indicator">No steps queued</div>
+      <div class="step-indicator" id="step-indicator">Adım kuyruğu boş</div>
       <div class="speed-row">
         <label>Speed</label>
         <input type="range" min="150" max="2000" value="800" id="speed-slider" oninput="updateSpeed(this.value)">
@@ -185,7 +198,7 @@
 
     <!-- Log -->
     <div class="log" id="log">
-      <div class="log-entry info">› Ready. Insert values to begin.</div>
+      <div class="log-entry info">› Hazır. Değer ekleyerek başlayın.</div>
     </div>
 
   </div><!-- /sidebar -->
@@ -200,7 +213,7 @@
         <line x1="22" y1="22" x2="15" y2="30" stroke="currentColor" stroke-width="1.5"/>
         <line x1="38" y1="22" x2="45" y2="30" stroke="currentColor" stroke-width="1.5"/>
       </svg>
-      <p>Insert values to build your tree</p>
+      <p>Ağacı oluşturmak için değer ekleyin</p>
     </div>
 
     <svg id="tree-svg"></svg>

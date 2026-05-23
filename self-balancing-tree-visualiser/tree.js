@@ -620,14 +620,14 @@ class AVLTree {
   
   rotateRight(y, steps) {
     let x = y.left, T2 = x.right;
-    steps.push({ type: 'rotate', desc: `Right rotation on ${y.val}`, highlight: [y.id, x.id], kind: 'rotate' });
+    steps.push({ type: 'rotate', desc: `${y.val} üzerinde sağ rotasyon`, highlight: [y.id, x.id], kind: 'rotate' });
     x.right = y; y.left = T2;
     this.update(y); this.update(x);
     metrics.rotations++; return x;
   }
   rotateLeft(x, steps) {
     let y = x.right, T2 = y.left;
-    steps.push({ type: 'rotate', desc: `Left rotation on ${x.val}`, highlight: [x.id, y.id], kind: 'rotate' });
+    steps.push({ type: 'rotate', desc: `${x.val} üzerinde sol rotasyon`, highlight: [x.id, y.id], kind: 'rotate' });
     y.left = x; x.right = T2;
     this.update(x); this.update(y);
     metrics.rotations++; return y;
@@ -639,27 +639,13 @@ class AVLTree {
     const leftBf = this.bf(n.left);
     if (leftBf >= 0) {
       // LL Case
-      steps.push({
-    type:'rotate',
-    desc:'Dengesiz ağaç tespit edildi',
-    highlight:[n.id],
-    kind:'rotate',
-    avlSnapshot:serializeAVL(this.root)
-});
-      steps.push({ type:'rotate', desc:`⚠️ LL Durumu — ${n.val} sol ağırlıklı (BF=${n.bf}), tek sağ rotasyon uygulanacak`, highlight:[n.id, n.left?.id].filter(Boolean), kind:'rotate' });
+      steps.push({ type:'rotate', desc:`⚠️ LL Dengesizliği — ${n.val} sol ağırlıklı (BF=${n.bf}), sağ rotasyon uygulanacak`, highlight:[n.id, n.left?.id].filter(Boolean), kind:'rotate' });
       const result = this.rotateRight(n, steps);
       steps.push({ type:'rotate', desc:`✓ LL Rotasyonu tamamlandı — ${result.val} yeni üst düğüm`, highlight:[result.id], kind:'new' });
       return result;
     } else {
       // LR Case
-      steps.push({
-    type:'rotate',
-    desc:'Dengesiz ağaç tespit edildi',
-    highlight:[n.id],
-    kind:'rotate',
-    avlSnapshot:serializeAVL(this.root)
-});
-      steps.push({ type:'rotate', desc:`⚠️ LR Durumu — ${n.val} sol ağırlıklı, sol çocuk sağ ağırlıklı — çift rotasyon`, highlight:[n.id, n.left?.id].filter(Boolean), kind:'rotate' });
+      steps.push({ type:'rotate', desc:`⚠️ LR Dengesizliği — ${n.val} sol ağırlıklı, sol çocuk sağ ağırlıklı — çift rotasyon`, highlight:[n.id, n.left?.id].filter(Boolean), kind:'rotate' });
       steps.push({ type:'rotate', desc:`LR Adım 1/2 — ${n.left.val} üzerinde sol rotasyon`, highlight:[n.left?.id].filter(Boolean), kind:'rotate' });
       n.left = this.rotateLeft(n.left, steps);
       steps.push({ type:'rotate', desc:`LR Adım 2/2 — ${n.val} üzerinde sağ rotasyon`, highlight:[n.id], kind:'rotate' });
@@ -673,27 +659,13 @@ class AVLTree {
     const rightBf = this.bf(n.right);
     if (rightBf <= 0) {
       // RR Case
-      steps.push({
-    type:'rotate',
-    desc:'Dengesiz ağaç tespit edildi',
-    highlight:[n.id],
-    kind:'rotate',
-    avlSnapshot:serializeAVL(this.root)
-});
-      steps.push({ type:'rotate', desc:`⚠️ RR Durumu — ${n.val} sağ ağırlıklı (BF=${n.bf}), tek sol rotasyon uygulanacak`, highlight:[n.id, n.right?.id].filter(Boolean), kind:'rotate' });
+      steps.push({ type:'rotate', desc:`⚠️ RR Dengesizliği — ${n.val} sağ ağırlıklı (BF=${n.bf}), sol rotasyon uygulanacak`, highlight:[n.id, n.right?.id].filter(Boolean), kind:'rotate' });
       const result = this.rotateLeft(n, steps);
       steps.push({ type:'rotate', desc:`✓ RR Rotasyonu tamamlandı — ${result.val} yeni üst düğüm`, highlight:[result.id], kind:'new' });
       return result;
     } else {
       // RL Case
-      steps.push({
-    type:'rotate',
-    desc:'Dengesiz ağaç tespit edildi',
-    highlight:[n.id],
-    kind:'rotate',
-    avlSnapshot:serializeAVL(this.root)
-});
-      steps.push({ type:'rotate', desc:`⚠️ RL Durumu — ${n.val} sağ ağırlıklı, sağ çocuk sol ağırlıklı — çift rotasyon`, highlight:[n.id, n.right?.id].filter(Boolean), kind:'rotate' });
+      steps.push({ type:'rotate', desc:`⚠️ RL Dengesizliği — ${n.val} sağ ağırlıklı, sağ çocuk sol ağırlıklı — çift rotasyon`, highlight:[n.id, n.right?.id].filter(Boolean), kind:'rotate' });
       steps.push({ type:'rotate', desc:`RL Adım 1/2 — ${n.right.val} üzerinde sağ rotasyon`, highlight:[n.right?.id].filter(Boolean), kind:'rotate' });
       n.right = this.rotateRight(n.right, steps);
       steps.push({ type:'rotate', desc:`RL Adım 2/2 — ${n.val} üzerinde sol rotasyon`, highlight:[n.id], kind:'rotate' });
@@ -752,7 +724,7 @@ _insert(n, val, steps) {
 
     steps.push({
         type:'info',
-        desc:`Node ${n.val} BF=${n.bf}`,
+        desc:`${n.val} düğümü güncellendi — BF=${n.bf}`,
         highlight:[n.id],
         kind:'info'
     });
@@ -779,20 +751,18 @@ insert(val){
 }
   _delete(n, val, steps, found) {
     if (!n) return null;
-    steps.push({ type: 'visit', desc: `Visiting ${n.val}`, highlight: [n.id], kind: 'path' });
     if (val < n.val) {
       n.left = this._delete(n.left, val, steps, found);
     } else if (val > n.val) {
       n.right = this._delete(n.right, val, steps, found);
     } else {
       found.hit = true;
-      steps.push({ type: 'delete', desc: `Deleting ${val}`, highlight: [n.id], kind: 'delete' });
+      steps.push({ type: 'delete', desc: `${val} siliniyor`, highlight: [n.id], kind: 'delete' });
       if (!n.left) return n.right;
       if (!n.right) return n.left;
-      // Find inorder successor (min of right subtree)
       let successor = n.right;
       while (successor.left) successor = successor.left;
-      steps.push({ type: 'info', desc: `Replacing with inorder successor ${successor.val}`, highlight: [successor.id], kind: 'path' });
+      steps.push({ type: 'info', desc: `Inorder halef: ${successor.val} ile değiştiriliyor`, highlight: [successor.id], kind: 'path' });
       n.val = successor.val;
       n.right = this._delete(n.right, successor.val, steps, { hit: false });
     }
@@ -800,23 +770,67 @@ insert(val){
     return this.balance(n, steps);
   }
 
-  delete(val) {
-    let steps = [{ type: 'info', desc: `Deleting ${val} from AVL Tree`, highlight: [], kind: 'info' }];
-    let found = { hit: false };
-    this.root = this._delete(this.root, val, steps, found);
-    if (!found.hit) {
-      steps.push({ type: 'info', desc: `${val} not found in tree`, highlight: [], kind: 'info' });
+  // Sadece arama — ağaca dokunmaz, snapshot bazlı path adımları üretir
+  _searchPath(n, val, steps, currentRoot) {
+    if (!n) return false;
+    // Bu node'u turuncu ile highlight'la — ağaç bozulmamış halde göster
+    steps.push({
+      type: 'visit',
+      desc: `${n.val} ziyaret ediliyor`,
+      highlight: [n.id],
+      kind: 'path',
+      avlSnapshot: serializeAVL(currentRoot),
+    });
+    if (val === n.val) {
+      steps.push({
+        type: 'found',
+        desc: `${val} bulundu — silme başlıyor`,
+        highlight: [n.id],
+        kind: 'found',
+        avlSnapshot: serializeAVL(currentRoot),
+      });
+      return true;
     }
+    return val < n.val
+      ? this._searchPath(n.left,  val, steps, currentRoot)
+      : this._searchPath(n.right, val, steps, currentRoot);
+  }
+
+  delete(val) {
+    const steps = [{ type: 'info', desc: `${val} AVL ağacında aranıyor`, highlight: [], kind: 'info', avlSnapshot: serializeAVL(this.root) }];
+
+    // Faz 1 — snapshot bazlı arama, ağaca dokunmaz
+    const found = this._searchPath(this.root, val, steps, this.root);
+
+    if (!found) {
+      steps.push({ type: 'info', desc: `${val} ağaçta bulunamadı`, highlight: [], kind: 'info', avlSnapshot: serializeAVL(this.root) });
+      return steps;
+    }
+
+    // Faz 2 — gerçek silme; her adım kendi o-anki ara snapshot'ını taşısın
+    const tmpTree = new AVLTree();
+    tmpTree.root = deserializeAVL(serializeAVL(this.root));
+    const deleteSteps = [];
+    tmpTree.root = tmpTree._delete(tmpTree.root, val, deleteSteps, { hit: false });
+
+    // Her adıma o anki FINAL ağaç durumunu yaz (silme tamamlandıktan sonra)
+    const finalSnap = serializeAVL(tmpTree.root);
+    deleteSteps.forEach(s => { s.finalSnapshot = finalSnap; });
+    steps.push(...deleteSteps);
+
+    // Gerçek ağacı güncelle
+    this.root = tmpTree.root;
+
     return steps;
   }
   _search(n, val, steps) {
-    if (!n) { steps.push({ type: 'info', desc: `${val} not found`, highlight: [], kind: 'info' }); return; }
-    steps.push({ type: 'visit', desc: `Visiting ${n.val}`, highlight: [n.id], kind: 'path' });
-    if (val === n.val) { steps.push({ type: 'found', desc: `Found ${val}!`, highlight: [n.id], kind: 'found' }); return; }
+    if (!n) { steps.push({ type: 'info', desc: `${val} bulunamadı`, highlight: [], kind: 'info' }); return; }
+    steps.push({ type: 'visit', desc: `${n.val} ziyaret ediliyor`, highlight: [n.id], kind: 'path' });
+    if (val === n.val) { steps.push({ type: 'found', desc: `${val} bulundu!`, highlight: [n.id], kind: 'found' }); return; }
     if (val < n.val) this._search(n.left, val, steps); else this._search(n.right, val, steps);
   }
   search(val) {
-    let steps = [{ type: 'info', desc: `Searching for ${val}`, highlight: [], kind: 'info' }];
+    let steps = [{ type: 'info', desc: `${val} aranıyor`, highlight: [], kind: 'info' }];
     this._search(this.root, val, steps); return steps;
   }
   size(n = this.root)  { return n ? 1 + this.size(n.left) + this.size(n.right) : 0; }
@@ -867,19 +881,19 @@ class RBTree {
 
   // ── Insert: only 3 clean steps ──
   insert(val) {
-    this._steps = [{ type: 'info', desc: `Inserting ${val} into Red-Black Tree`, highlight: [], kind: 'info' }];
+    this._steps = [{ type: 'info', desc: `${val} Red-Black ağacına ekleniyor`, highlight: [], kind: 'info' }];
     let node = new RBNode(val);
     let inserted = this._bstInsert(node);
     if (!inserted) {
-      this._steps.push({ type: 'info', desc: `${val} already exists in tree`, highlight: [], kind: 'found' });
+      this._steps.push({ type: 'info', desc: `${val} zaten ağaçta mevcut`, highlight: [], kind: 'found' });
       return this._steps;
     }
-    this._steps.push({ type: 'insert', desc: `Placed ${val} as a new RED node`, highlight: [node.id], kind: 'new' });
+    this._steps.push({ type: 'insert', desc: `${val} KIRMIZI düğüm olarak eklendi`, highlight: [node.id], kind: 'new' });
     let hadFix = this._fixInsert(node);
     if (hadFix) {
-      this._steps.push({ type: 'rotate', desc: `Tree rebalanced — RB properties restored ✓`, highlight: [], kind: 'rotate' });
+      this._steps.push({ type: 'rotate', desc: `Ağaç yeniden dengelendi — RB özellikleri sağlandı ✓`, highlight: [], kind: 'rotate' });
     } else {
-      this._steps.push({ type: 'info', desc: `No fix needed — tree already valid ✓`, highlight: [], kind: 'info' });
+      this._steps.push({ type: 'info', desc: `Düzeltme gerekmedi — ağaç zaten geçerli ✓`, highlight: [], kind: 'info' });
     }
     return this._steps;
   }
@@ -929,15 +943,15 @@ class RBTree {
 
   // ── Delete: 3 clean steps ──
   delete(val) {
-    this._steps = [{ type: 'info', desc: `Deleting ${val} from Red-Black Tree`, highlight: [], kind: 'info' }];
+    this._steps = [{ type: 'info', desc: `${val} Red-Black ağacından siliniyor`, highlight: [], kind: 'info' }];
     let node = this._find(val);
     if (!node) {
-      this._steps.push({ type: 'info', desc: `${val} not found in tree`, highlight: [], kind: 'info' });
+      this._steps.push({ type: 'info', desc: `${val} ağaçta bulunamadı`, highlight: [], kind: 'info' });
       return this._steps;
     }
-    this._steps.push({ type: 'delete', desc: `Found ${val} — removing node`, highlight: [node.id], kind: 'delete' });
+    this._steps.push({ type: 'delete', desc: `${val} bulundu — düğüm siliniyor`, highlight: [node.id], kind: 'delete' });
     this._rbDelete(node);
-    this._steps.push({ type: 'info', desc: `Deletion complete — tree rebalanced ✓`, highlight: [], kind: 'info' });
+    this._steps.push({ type: 'info', desc: `Silme tamamlandı — ağaç yeniden dengelendi ✓`, highlight: [], kind: 'info' });
     return this._steps;
   }
 
@@ -975,14 +989,15 @@ class RBTree {
 
   // ── Search: keeps step-by-step path (useful to see) ──
   search(val) {
-    let steps = [{ type: 'info', desc: `Searching for ${val} in RB Tree`, highlight: [], kind: 'info' }];
+    let steps = [{ type: 'info', desc: `${val} RB ağacında aranıyor`, highlight: [], kind: 'info' }];
     let cur = this.root;
     while (cur) {
-      steps.push({ type: 'visit', desc: `Visiting ${cur.val} (${cur.color})`, highlight: [cur.id], kind: 'path' });
-      if (val === cur.val) { steps.push({ type: 'found', desc: `Found ${val}!`, highlight: [cur.id], kind: 'found' }); return steps; }
+      const renk = cur.color === 'red' ? 'kırmızı' : 'siyah';
+      steps.push({ type: 'visit', desc: `${cur.val} ziyaret ediliyor (${renk})`, highlight: [cur.id], kind: 'path' });
+      if (val === cur.val) { steps.push({ type: 'found', desc: `${val} bulundu!`, highlight: [cur.id], kind: 'found' }); return steps; }
       cur = val < cur.val ? cur.left : cur.right;
     }
-    steps.push({ type: 'info', desc: `${val} not found`, highlight: [], kind: 'info' });
+    steps.push({ type: 'info', desc: `${val} bulunamadı`, highlight: [], kind: 'info' });
     return steps;
   }
 
@@ -1009,12 +1024,12 @@ class BTree {
   constructor(t = 2) { this.t = t; this.root = new BTreeNode(true); this._steps = []; }
 
   insert(val) {
-    this._steps = [{ type: 'info', desc: `Inserting ${val} into B-Tree (t=${this.t})`, highlight: [], kind: 'info' }];
+    this._steps = [{ type: 'info', desc: `${val} B-Ağacına ekleniyor (t=${this.t})`, highlight: [], kind: 'info' }];
     let r = this.root;
     if (r.keys.length === 2 * this.t - 1) {
       let s = new BTreeNode(false);
       this.root = s; s.children.push(r);
-      this._steps.push({ type: 'split', desc: `Root full — splitting root`, highlight: [r.id], kind: 'rotate' });
+      this._steps.push({ type: 'split', desc: `Kök düğüm dolu — kök bölünüyor`, highlight: [r.id], kind: 'rotate' });
       this._splitChild(s, 0); this._insertNonFull(s, val);
     } else { this._insertNonFull(r, val); }
     return this._steps;
@@ -1025,12 +1040,12 @@ class BTree {
     if (n.leaf) {
       while (i >= 0 && val < n.keys[i]) i--;
       n.keys.splice(i + 1, 0, val);
-      this._steps.push({ type: 'insert', desc: `Inserted ${val} into leaf`, highlight: [n.id], kind: 'new' });
+      this._steps.push({ type: 'insert', desc: `${val} yaprak düğüme eklendi`, highlight: [n.id], kind: 'new' });
     } else {
       while (i >= 0 && val < n.keys[i]) i--; i++;
-      this._steps.push({ type: 'visit', desc: `Descending into child ${i}`, highlight: [n.id], kind: 'path' });
+      this._steps.push({ type: 'visit', desc: `${i}. çocuğa iniliyor`, highlight: [n.id], kind: 'path' });
       if (n.children[i].keys.length === 2 * this.t - 1) {
-        this._steps.push({ type: 'split', desc: `Child full — splitting`, highlight: [n.children[i].id], kind: 'rotate' });
+        this._steps.push({ type: 'split', desc: `Çocuk düğüm dolu — bölünüyor`, highlight: [n.children[i].id], kind: 'rotate' });
         this._splitChild(n, i); if (val > n.keys[i]) i++;
       }
       this._insertNonFull(n.children[i], val);
@@ -1047,7 +1062,7 @@ class BTree {
   }
 
   delete(val) {
-    this._steps = [{ type: 'info', desc: `Deleting ${val} from B-Tree`, highlight: [], kind: 'info' }];
+    this._steps = [{ type: 'info', desc: `${val} B-Ağacından siliniyor`, highlight: [], kind: 'info' }];
     this._delete(this.root, val);
     if (this.root.keys.length === 0 && this.root.children.length > 0) this.root = this.root.children[0];
     return this._steps;
@@ -1058,7 +1073,7 @@ class BTree {
     let i = n.keys.findIndex(k => k >= val);
     if (i === -1) i = n.keys.length;
     if (i < n.keys.length && n.keys[i] === val) {
-      this._steps.push({ type: 'delete', desc: `Found ${val} in node`, highlight: [n.id], kind: 'delete' });
+      this._steps.push({ type: 'delete', desc: `${val} düğümde bulundu — siliniyor`, highlight: [n.id], kind: 'delete' });
       if (n.leaf) { n.keys.splice(i, 1); }
       else {
         if (n.children[i].keys.length >= t) { let pred = this._getPred(n.children[i]); n.keys[i] = pred; this._delete(n.children[i], pred); }
@@ -1066,8 +1081,8 @@ class BTree {
         else { this._merge(n, i); this._delete(n.children[i], val); }
       }
     } else {
-      if (n.leaf) { this._steps.push({ type: 'info', desc: `${val} not found`, highlight: [], kind: 'info' }); return; }
-      this._steps.push({ type: 'visit', desc: `Descending to child ${i}`, highlight: [n.id], kind: 'path' });
+      if (n.leaf) { this._steps.push({ type: 'info', desc: `${val} ağaçta bulunamadı`, highlight: [], kind: 'info' }); return; }
+      this._steps.push({ type: 'visit', desc: `${i}. çocuğa iniliyor`, highlight: [n.id], kind: 'path' });
       if (n.children[i].keys.length < t) this._fill(n, i);
       if (i > n.keys.length) this._delete(n.children[i-1], val);
       else                   this._delete(n.children[i],   val);
@@ -1084,21 +1099,21 @@ class BTree {
     child.keys = child.keys.concat(sib.keys);
     child.children = child.children.concat(sib.children);
     n.keys.splice(i, 1); n.children.splice(i+1, 1);
-    this._steps.push({ type: 'merge', desc: `Merged children at index ${i}`, highlight: [child.id], kind: 'rotate' });
+    this._steps.push({ type: 'merge', desc: `${i}. indeksteki çocuklar birleştirildi`, highlight: [child.id], kind: 'rotate' });
   }
 
   search(val) {
-    let steps = [{ type: 'info', desc: `Searching for ${val} in B-Tree`, highlight: [], kind: 'info' }];
+    let steps = [{ type: 'info', desc: `${val} B-Ağacında aranıyor`, highlight: [], kind: 'info' }];
     this._search(this.root, val, steps); return steps;
   }
 
   _search(n, val, steps) {
     if (!n) return;
-    steps.push({ type: 'visit', desc: `Checking node [${n.keys.join(', ')}]`, highlight: [n.id], kind: 'path' });
+    steps.push({ type: 'visit', desc: `Düğüm kontrol ediliyor [${n.keys.join(', ')}]`, highlight: [n.id], kind: 'path' });
     let i = 0;
     while (i < n.keys.length && val > n.keys[i]) i++;
-    if (i < n.keys.length && n.keys[i] === val) { steps.push({ type: 'found', desc: `Found ${val}!`, highlight: [n.id], kind: 'found' }); return; }
-    if (n.leaf) { steps.push({ type: 'info', desc: `${val} not found`, highlight: [], kind: 'info' }); return; }
+    if (i < n.keys.length && n.keys[i] === val) { steps.push({ type: 'found', desc: `${val} bulundu!`, highlight: [n.id], kind: 'found' }); return; }
+    if (n.leaf) { steps.push({ type: 'info', desc: `${val} ağaçta bulunamadı`, highlight: [], kind: 'info' }); return; }
     this._search(n.children[i], val, steps);
   }
 
@@ -1275,7 +1290,7 @@ function render(highlights = new Map()) {
       keys.forEach((k, i) => {
         let x = -w/2 + i*34 + 17;
         el.append('text').attr('x', x).attr('y', 5).attr('text-anchor', 'middle')
-          .attr('fill', isHL ? '#111' : cssVar('--text'))
+          .attr('fill', '#ffffff')
           .attr('font-size', 13).attr('font-weight', 600).attr('font-family', 'JetBrains Mono, monospace').text(k);
         if (i < keys.length - 1)
           el.append('line').attr('x1', x+17).attr('y1', -h/2).attr('x2', x+17).attr('y2', h/2)
@@ -1345,7 +1360,7 @@ function render(highlights = new Map()) {
         .attr('fill', '#fff').attr('opacity', 0.12);
 
       el.append('text').attr('dy', 5).attr('text-anchor', 'middle')
-        .attr('fill', isHL ? '#111' : cssVar('--text'))
+        .attr('fill', '#ffffff')
         .attr('font-size', 13).attr('font-weight', 700)
         .attr('font-family', 'JetBrains Mono, monospace').text(d.data.val);
 
@@ -1373,10 +1388,10 @@ function doInsert() {
   if (isNaN(v)) return;
   metrics.ops++;
   let steps = trees[currentTree].insert(v);
-  addLog(`Insert ${v}`, 'insert');
+  addLog(`${v} eklendi`, 'insert');
   document.getElementById('val-input').value = '';
   queueSteps(steps);
-  autoSnapshot('Insert', v);  // setTimeout olmadan direkt çağır
+  autoSnapshot('Insert', v);
 }
 
 function doDelete() {
@@ -1384,10 +1399,10 @@ function doDelete() {
   if (isNaN(v)) return;
   metrics.ops++;
   let steps = trees[currentTree].delete(v);
-  addLog(`Delete ${v}`, 'delete');
+  addLog(`${v} silindi`, 'delete');
   document.getElementById('val-input').value = '';
   queueSteps(steps);
-  autoSnapshot('Delete', v);  // setTimeout olmadan direkt çağır
+  autoSnapshot('Delete', v);
 }
 
 function doSearch() {
@@ -1395,7 +1410,7 @@ function doSearch() {
   if (isNaN(v)) return;
   metrics.ops++;
   let steps = trees[currentTree].search(v);
-  addLog(`Search ${v}`, 'search');
+  addLog(`${v} aranıyor`, 'search');
   document.getElementById('val-input').value = '';
   queueSteps(steps);
 }
@@ -1406,14 +1421,14 @@ function clearTree() {
   metrics = { rotations: 0, ops: 0 }; isFirstRender = true;
   render(new Map()); updateStepIndicator(); hideStepOverlay();
   document.getElementById('traversal-result').style.display = 'none';
-  addLog('Tree cleared', 'info');
+  addLog('Ağaç temizlendi', 'info');
 }
 
 function insertSequence(vals) {
   clearTree();
   for (let v of vals) { trees[currentTree].insert(v); metrics.ops++; }
   isFirstRender = true; render(new Map());
-  addLog(`Inserted: [${vals.join(', ')}]`, 'insert');
+  addLog(`Eklendi: [${vals.join(', ')}]`, 'insert');
   setTimeout(() => fitTreeToView(), 80);
 }
 
@@ -1425,7 +1440,7 @@ function insertRandom(n) {
     vals.push(v); trees[currentTree].insert(v); metrics.ops++;
   }
   isFirstRender = true; render(new Map());
-  addLog(`Random: [${vals.join(', ')}]`, 'insert');
+  addLog(`Rastgele eklendi: [${vals.join(', ')}]`, 'insert');
   setTimeout(() => fitTreeToView(), 80);
 }
 
@@ -1435,7 +1450,14 @@ function insertRandom(n) {
 function traversalSteps(order) {
   let tree = trees[currentTree];
   let steps = [], sequence = [];
-  steps.push({ type: 'info', desc: `${order} traversal starting…`, highlight: [], kind: 'info' });
+
+  const orderNames = {
+    inorder:    'Sıralı Gezinme (Sol→Kök→Sağ)',
+    preorder:   'Ön-sıra Gezinme (Kök→Sol→Sağ)',
+    postorder:  'Son-sıra Gezinme (Sol→Sağ→Kök)',
+    levelorder: 'Seviye-sıra Gezinme (BFS)',
+  };
+  steps.push({ type: 'info', desc: `${orderNames[order] || order} başlıyor…`, highlight: [], kind: 'info' });
 
   if (currentTree === 'btree') {
     function btInorder(n) {
@@ -1443,27 +1465,27 @@ function traversalSteps(order) {
       n.keys.forEach((k, i) => {
         if (n.children[i]) btInorder(n.children[i]);
         sequence.push({ id: n.id, val: k });
-        steps.push({ type: 'visit', desc: `Visit key ${k}`, highlight: [n.id], kind: 'path' });
+        steps.push({ type: 'visit', desc: `${k} anahtarı ziyaret ediliyor`, highlight: [n.id], kind: 'path' });
       });
       if (n.children[n.keys.length]) btInorder(n.children[n.keys.length]);
     }
     function btPreorder(n) {
       if (!n) return;
-      steps.push({ type: 'visit', desc: `Visit node [${n.keys.join(',')}]`, highlight: [n.id], kind: 'path' });
+      steps.push({ type: 'visit', desc: `Düğüm ziyaret ediliyor [${n.keys.join(',')}]`, highlight: [n.id], kind: 'path' });
       n.keys.forEach(k => sequence.push({ id: n.id, val: k }));
       n.children.forEach(btPreorder);
     }
     function btPostorder(n) {
       if (!n) return;
       n.children.forEach(btPostorder);
-      steps.push({ type: 'visit', desc: `Visit node [${n.keys.join(',')}]`, highlight: [n.id], kind: 'path' });
+      steps.push({ type: 'visit', desc: `Düğüm ziyaret ediliyor [${n.keys.join(',')}]`, highlight: [n.id], kind: 'path' });
       n.keys.forEach(k => sequence.push({ id: n.id, val: k }));
     }
     function btLevel(root) {
       let q = [root];
       while (q.length) {
         let n = q.shift(); if (!n) continue;
-        steps.push({ type: 'visit', desc: `Visit node [${n.keys.join(',')}]`, highlight: [n.id], kind: 'path' });
+        steps.push({ type: 'visit', desc: `Düğüm ziyaret ediliyor [${n.keys.join(',')}]`, highlight: [n.id], kind: 'path' });
         n.keys.forEach(k => sequence.push({ id: n.id, val: k }));
         n.children.forEach(c => q.push(c));
       }
@@ -1474,16 +1496,16 @@ function traversalSteps(order) {
     else                            btLevel(tree.root);
   } else {
     let root = tree.root;
-    function inorder(n)   { if (!n) return; inorder(n.left); sequence.push({id:n.id,val:n.val}); steps.push({type:'visit',desc:`Visit ${n.val}`,highlight:[n.id],kind:'path'}); inorder(n.right); }
-    function preorder(n)  { if (!n) return; sequence.push({id:n.id,val:n.val}); steps.push({type:'visit',desc:`Visit ${n.val}`,highlight:[n.id],kind:'path'}); preorder(n.left); preorder(n.right); }
-    function postorder(n) { if (!n) return; postorder(n.left); postorder(n.right); sequence.push({id:n.id,val:n.val}); steps.push({type:'visit',desc:`Visit ${n.val}`,highlight:[n.id],kind:'path'}); }
+    function inorder(n)   { if (!n) return; inorder(n.left); sequence.push({id:n.id,val:n.val}); steps.push({type:'visit',desc:`${n.val} ziyaret ediliyor`,highlight:[n.id],kind:'path'}); inorder(n.right); }
+    function preorder(n)  { if (!n) return; sequence.push({id:n.id,val:n.val}); steps.push({type:'visit',desc:`${n.val} ziyaret ediliyor`,highlight:[n.id],kind:'path'}); preorder(n.left); preorder(n.right); }
+    function postorder(n) { if (!n) return; postorder(n.left); postorder(n.right); sequence.push({id:n.id,val:n.val}); steps.push({type:'visit',desc:`${n.val} ziyaret ediliyor`,highlight:[n.id],kind:'path'}); }
     function levelorder(root) {
       if (!root) return;
       let q = [root];
       while (q.length) {
         let n = q.shift();
         sequence.push({id:n.id,val:n.val});
-        steps.push({type:'visit',desc:`Visit ${n.val} (BFS)`,highlight:[n.id],kind:'path'});
+        steps.push({type:'visit',desc:`${n.val} ziyaret ediliyor (seviye sırası)`,highlight:[n.id],kind:'path'});
         if (n.left) q.push(n.left); if (n.right) q.push(n.right);
       }
     }
@@ -1494,21 +1516,21 @@ function traversalSteps(order) {
   }
 
   let vals = sequence.map(s => s.val);
-  steps.push({ type: 'found', desc: `${order}: [${vals.join(' → ')}]`, highlight: sequence.map(s => s.id), kind: 'found' });
+  steps.push({ type: 'found', desc: `Sonuç: [${vals.join(' → ')}]`, highlight: sequence.map(s => s.id), kind: 'found' });
   return { steps, vals };
 }
 
 function doTraversal(order) {
   let tree = trees[currentTree];
-  if (!tree.root) { addLog('Tree is empty', 'info'); return; }
+  if (!tree.root) { addLog('Ağaç boş', 'info'); return; }
   metrics.ops++;
   let { steps, vals } = traversalSteps(order);
   let box = document.getElementById('traversal-result');
-  const names = { inorder:'Inorder (L→N→R)', preorder:'Preorder (N→L→R)', postorder:'Postorder (L→R→N)', levelorder:'Level-order (BFS)' };
+  const names = { inorder:'Sıralı (Sol→Kök→Sağ)', preorder:'Ön-sıra (Kök→Sol→Sağ)', postorder:'Son-sıra (Sol→Sağ→Kök)', levelorder:'Seviye-sıra (BFS)' };
   document.getElementById('traversal-label').textContent = names[order] || order;
   document.getElementById('traversal-vals').textContent  = vals.join(' → ');
   box.style.display = 'block';
-  addLog(`${order}: [${vals.join(', ')}]`, 'search');
+  addLog(`${names[order]}: [${vals.join(', ')}]`, 'search');
   queueSteps(steps);
 }
 
@@ -1536,7 +1558,12 @@ function applyStep(step) {
   let hlMap = new Map();
   (step.highlight || []).forEach(id => { if (id) hlMap.set(id, step.kind || 'path'); });
 
-  if ('avlSnapshot' in step) {
+  if ('finalSnapshot' in step) {
+    // Kalıcı güncelleme — trees.avl.root gerçekten değişiyor
+    trees.avl.root = step.finalSnapshot ? deserializeAVL(step.finalSnapshot) : null;
+    render(hlMap);
+  } else if ('avlSnapshot' in step) {
+    // Geçici görsel — ağacı bozmadan sadece render
     const savedRoot = trees.avl.root;
     trees.avl.root = step.avlSnapshot ? deserializeAVL(step.avlSnapshot) : null;
     render(hlMap);
@@ -1580,7 +1607,7 @@ function stopPlay() {
 
 function updateStepIndicator() {
   let el = document.getElementById('step-indicator');
-  if (!stepQueue.length) { el.textContent = 'No steps queued'; return; }
+  if (!stepQueue.length) { el.textContent = 'Adım kuyruğu boş'; return; }
   el.textContent = `Step ${Math.max(0, stepIndex + 1)} / ${stepQueue.length}`;
 }
 
@@ -1631,7 +1658,7 @@ function switchTree(type) {
   document.getElementById('traversal-result').style.display = 'none';
   const rotSection = document.getElementById('rotation-demo-section');
 if (rotSection) rotSection.style.display = type === 'avl' ? 'block' : 'none';
-  addLog(`Switched to ${type === 'avl' ? 'AVL Tree' : type === 'rb' ? 'Red-Black Tree' : 'B-Tree'}`, 'info');
+  addLog(`${type === 'avl' ? 'AVL Ağacı' : type === 'rb' ? 'Kırmızı-Siyah Ağaç' : 'B-Ağacı'} seçildi`, 'info');
   if (activeRightPanel === 'pseudo') { currentHighlightedLines = new Set(); renderPseudoCode(type); }
   if (activeRightPanel === 'bigo') renderBigO(type);
 }
@@ -1908,96 +1935,99 @@ function showToast(msg) {
   setTimeout(() => toast.remove(), 2100);
 }
 // ============================================================
-// RAW BST INSERT (dengesiz ara durum göstermek için)
+// AVL ROTATION — mevcut ağaçta rotasyon tipine uygun ilk
+// dengesizlik noktasını bul ve rotasyonu doğrudan uygula
 // ============================================================
-function rawBSTInsertAVL(n, val) {
-  if (!n) { let node = new AVLNode(val); node.height = 1; node.bf = 0; return node; }
-  if (val < n.val)      n.left  = rawBSTInsertAVL(n.left,  val);
-  else if (val > n.val) n.right = rawBSTInsertAVL(n.right, val);
-  n.height = 1 + Math.max(n.left ? n.left.height : 0, n.right ? n.right.height : 0);
-  n.bf = (n.left ? n.left.height : 0) - (n.right ? n.right.height : 0);
-  return n;
+
+// Ağaçta belirtilen rotasyon tipine uyan ilk node'u döndürür.
+// LL: bf>1 ve left.bf>=0  |  RR: bf<-1 ve right.bf<=0
+// LR: bf>1 ve left.bf<0   |  RL: bf<-1 ve right.bf>0
+function findRotationNode(n, type, tree) {
+  if (!n) return null;
+  const bf = tree.bf(n);
+  if (type === 'LL' && bf > 1  && tree.bf(n.left)  >= 0) return n;
+  if (type === 'RR' && bf < -1 && tree.bf(n.right) <= 0) return n;
+  if (type === 'LR' && bf > 1  && tree.bf(n.left)  < 0)  return n;
+  if (type === 'RL' && bf < -1 && tree.bf(n.right) > 0)  return n;
+  return findRotationNode(n.left, type, tree) || findRotationNode(n.right, type, tree);
 }
 
-// ============================================================
-// AVL ROTATION DEMO
-// ============================================================
-function demoRotation(type) {
-  if (currentTree !== 'avl') switchTree('avl');
+// Rotasyon sonucu steps dizisi oluşturur (adım adım gösterim)
+function applyRotation(type) {
+  if (currentTree !== 'avl') { switchTree('avl'); }
 
-  const demos = {
-    'LL': { vals:[30,20,10], name:'Sol-Sol (LL)', desc:'30 → 20 → 10: sol-sol ağırlık, tek sağ rotasyon' },
-    'RR': { vals:[10,20,30], name:'Sağ-Sağ (RR)', desc:'10 → 20 → 30: sağ-sağ ağırlık, tek sol rotasyon' },
-    'LR': { vals:[30,10,20], name:'Sol-Sağ (LR)', desc:'30 → 10 → 20: sol-sağ ağırlık, çift rotasyon' },
-    'RL': { vals:[10,30,20], name:'Sağ-Sol (RL)', desc:'10 → 30 → 20: sağ-sol ağırlık, çift rotasyon' },
-  };
-
-  const demo = demos[type];
-  const vals = demo.vals;
-  let allSteps = [];
-
-  allSteps.push({
-    type:'info', desc:`🎬 ${demo.name} Demo — ${demo.desc}`,
-    highlight:[], kind:'info', avlSnapshot: null
-  });
-
-  for (let i = 0; i < vals.length; i++) {
-    // Ekleme öncesi durum
-    let tBefore = new AVLTree();
-    for (let j = 0; j < i; j++) tBefore.insert(vals[j]);
-
-    allSteps.push({
-      type:'insert',
-      desc:`Adım ${i+1}/${vals.length}: ${vals[i]} ekleniyor${i===vals.length-1?' ← rotasyon burada tetiklenecek':''}`,
-      highlight:[], kind: i===vals.length-1 ? 'path' : 'new',
-      avlSnapshot: serializeAVL(tBefore.root)
-    });
-
-    if (i === vals.length - 1) {
-      // Dengesiz ara durum (ham BST insert, balance yok)
-      let tUnbal = new AVLTree();
-      for (let j = 0; j < i; j++) tUnbal.insert(vals[j]);
-      tUnbal.root = rawBSTInsertAVL(tUnbal.root, vals[i]);
-
-      allSteps.push({
-        type:'rotate',
-        desc:`⚠️ ${type} Dengesizliği oluştu — denge faktörü sınırı aşıldı`,
-        highlight:[], kind:'rotate',
-        avlSnapshot: serializeAVL(tUnbal.root)
-      });
-
-      // Rotasyon sonrası dengeli durum
-      let tAfter = new AVLTree();
-      for (let j = 0; j <= i; j++) tAfter.insert(vals[j]);
-
-      allSteps.push({
-        type:'rotate',
-        desc:`✓ ${demo.name} Rotasyonu tamamlandı — ağaç yeniden dengeli`,
-        highlight:[], kind:'found',
-        avlSnapshot: serializeAVL(tAfter.root)
-      });
-    } else {
-      let tAfter = new AVLTree();
-      for (let j = 0; j <= i; j++) tAfter.insert(vals[j]);
-      allSteps.push({
-        type:'insert', desc:`${vals[i]} eklendi — ağaç dengeli`,
-        highlight:[], kind:'new',
-        avlSnapshot: serializeAVL(tAfter.root)
-      });
-    }
+  const tree = trees.avl;
+  if (!tree.root) {
+    setRotStatus('Ağaç boş.', 'err'); return;
   }
 
-  // Asıl tree'yi son duruma getir
-  trees.avl = new AVLTree();
-  for (let v of vals) { trees.avl.insert(v); metrics.ops++; }
+  const node = findRotationNode(tree.root, type, tree);
+  if (!node) {
+    const msgs = {
+      LL: 'Sol-sol dengesizliği yok.',
+      RR: 'Sağ-sağ dengesizliği yok.',
+      LR: 'Sol-sağ dengesizliği yok.',
+      RL: 'Sağ-sol dengesizliği yok.',
+    };
+    setRotStatus(msgs[type], 'err');
+    addLog(`${type} rotasyonu uygulanamaz — uygun dengesizlik yok`, 'info');
+    return;
+  }
+
+  // Rotasyon öncesi snapshot
+  const snapBefore = serializeAVL(tree.root);
+
+  // Rotasyonu gerçek ağaç üzerinde uygula
+  const steps = [];
+  const labels = { LL:'Sağ Rotasyon', RR:'Sol Rotasyon', LR:'Sol+Sağ Rotasyon', RL:'Sağ+Sol Rotasyon' };
+
+  steps.push({
+    type: 'info',
+    desc: `${type} dengesizliği — ${node.val} düğümü (BF=${tree.bf(node)})`,
+    highlight: [node.id], kind: 'rotate',
+    avlSnapshot: snapBefore,
+  });
+
+  // Ağaçta o node'u rotasyonla dengele
+  function rebalanceNode(root, targetId) {
+    if (!root) return null;
+    if (root.id === targetId) return tree.balance(root, steps);
+    root.left  = rebalanceNode(root.left,  targetId);
+    root.right = rebalanceNode(root.right, targetId);
+    tree.update(root);
+    return root;
+  }
+
+  tree.root = rebalanceNode(tree.root, node.id);
+  metrics.rotations++;
+
+  const snapAfter = serializeAVL(tree.root);
+
+  steps.push({
+    type: 'rotate',
+    desc: `✓ ${labels[type]} tamamlandı`,
+    highlight: [], kind: 'new',
+    avlSnapshot: snapAfter,
+  });
+
+  setRotStatus(`${type} uygulandı — ${node.val} düğümü`, 'ok');
+  addLog(`${type} rotasyonu uygulandı (${node.val} üzerinde)`, 'rotate');
   isFirstRender = false;
-
-  addLog(`Demo: ${demo.name} [${vals.join(' → ')}]`, 'rotate');
-  addToHistoryLog('insert', `${type} Demo`);
-
-  stopPlay(); stepQueue = allSteps; stepIndex = -1;
-  updateStepIndicator(); togglePlay();
+  queueSteps(steps);
 }
+
+function setRotStatus(msg, state) {
+  const el = document.getElementById('rot-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'rot-status ' + (state || '');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.textContent = ''; el.className = 'rot-status'; }, 3000);
+}
+
+
+
+
 // ── Init ──
 initAuth();
 render(new Map());

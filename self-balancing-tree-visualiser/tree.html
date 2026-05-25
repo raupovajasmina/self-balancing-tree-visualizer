@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,39 +13,39 @@
 <div class="modal-overlay hidden" id="auth-modal">
   <div class="modal-box">
     <div class="modal-title">Tree Visualizer</div>
-    <div class="modal-sub" id="modal-sub">Sohbet geçmişine erişmek için hesabınıza giriş yapın.</div>
+    <div class="modal-sub" id="modal-sub">Log in to your account to access chat history.</div>
     <div class="modal-tabs">
-      <button class="modal-tab active" id="tab-login" onclick="switchModalTab('login')">Giriş Yap</button>
-      <button class="modal-tab" id="tab-register" onclick="switchModalTab('register')">Kayıt Ol</button>
+      <button class="modal-tab active" id="tab-login" onclick="switchModalTab('login')">Login</button>
+      <button class="modal-tab" id="tab-register" onclick="switchModalTab('register')">Register</button>
     </div>
     <div id="modal-login-form">
       <div class="modal-field">
-        <label>Kullanıcı Adı</label>
-        <input type="text" id="login-user" placeholder="kullanici_adi" autocomplete="username"/>
+        <label>Username</label>
+        <input type="text" id="login-user" placeholder="username" autocomplete="username"/>
       </div>
       <div class="modal-field">
-        <label>Şifre</label>
+        <label>Password</label>
         <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
       </div>
     </div>
     <div id="modal-register-form" style="display:none">
       <div class="modal-field">
-        <label>Kullanıcı Adı</label>
-        <input type="text" id="reg-user" placeholder="kullanici_adi" autocomplete="username"/>
+        <label>Username</label>
+        <input type="text" id="reg-user" placeholder="username" autocomplete="username"/>
       </div>
       <div class="modal-field">
-        <label>E-posta</label>
-        <input type="email" id="reg-email" placeholder="ornek@mail.com" autocomplete="email"/>
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="example@mail.com" autocomplete="email"/>
       </div>
       <div class="modal-field">
-        <label>Şifre</label>
+        <label>Password</label>
         <input type="password" id="reg-pass" placeholder="••••••••" autocomplete="new-password"/>
       </div>
     </div>
     <div class="modal-error" id="modal-error"></div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeAuthModal()">İptal</button>
-      <button class="btn btn-insert" id="modal-submit-btn" onclick="submitAuth()">Giriş Yap</button>
+      <button class="btn btn-secondary" onclick="closeAuthModal()">Cancel</button>
+      <button class="btn btn-insert" id="modal-submit-btn" onclick="submitAuth()">Login</button>
     </div>
   </div>
 </div>
@@ -66,7 +66,7 @@
   </div>
 
   <div class="theme-toggle">
-    <span class="theme-toggle-label" id="lbl-light">Lıght</span>
+    <span class="theme-toggle-label" id="lbl-light">Light</span>
     <div class="toggle-track" onclick="toggleTheme()" title="Toggle dark/light">
       <span class="toggle-icon sun">☀️</span>
       <span class="toggle-icon moon">🌙</span>
@@ -77,15 +77,15 @@
 
   <!-- Auth -->
   <div class="header-auth" id="header-auth">
-    <button class="btn-auth" onclick="openAuthModal()">Giriş Yap</button>
-    <button class="btn-auth primary" onclick="openAuthModal('register')">Kayıt Ol</button>
+    <button class="btn-auth" onclick="openAuthModal()">Login</button>
+    <button class="btn-auth primary" onclick="openAuthModal('register')">Register</button>
   </div>
   <div class="header-auth" id="header-user" style="display:none">
     <div class="user-badge">
       <div class="user-avatar" id="user-avatar-letter">U</div>
-      <span id="user-display-name">Kullanıcı</span>
+      <span id="user-display-name">User</span>
     </div>
-    <button class="btn-auth" onclick="doLogout()">Çıkış</button>
+    <button class="btn-auth" onclick="doLogout()">Logout</button>
   </div>
 </header>
 
@@ -165,7 +165,7 @@
         <button class="btn btn-secondary" id="play-btn" onclick="togglePlay()" title="Play/Pause (Space)">▶</button>
         <button class="btn btn-secondary" onclick="stepForward()" title="Forward (→)">▶▶</button>
       </div>
-      <div class="step-indicator" id="step-indicator">Adım kuyruğu boş</div>
+      <div class="step-indicator" id="step-indicator">Step queue is empty</div>
       <div class="speed-row">
         <label>Speed</label>
         <input type="range" min="150" max="2000" value="800" id="speed-slider" oninput="updateSpeed(this.value)">
@@ -198,7 +198,7 @@
 
     <!-- Log -->
     <div class="log" id="log">
-      <div class="log-entry info">› Hazır. Değer ekleyerek başlayın.</div>
+      <div class="log-entry info">› Ready. Start by inserting a value.</div>
     </div>
 
   </div><!-- /sidebar -->
@@ -213,7 +213,7 @@
         <line x1="22" y1="22" x2="15" y2="30" stroke="currentColor" stroke-width="1.5"/>
         <line x1="38" y1="22" x2="45" y2="30" stroke="currentColor" stroke-width="1.5"/>
       </svg>
-      <p>Ağacı oluşturmak için değer ekleyin</p>
+      <p>Insert a value to build the tree</p>
     </div>
 
     <svg id="tree-svg"></svg>
@@ -242,15 +242,15 @@
       </button>
       <button class="right-tab-btn" id="rtab-bigo" onclick="toggleRightPanel('bigo')" title="Big O Complexity">
         <span>📊</span>
-        <span class="tab-label">Bıg O</span>
+        <span class="tab-label">Big O</span>
       </button>
-      <button class="right-tab-btn" id="rtab-chat" onclick="toggleRightPanel('chat')" title="Sohbet">
+      <button class="right-tab-btn" id="rtab-chat" onclick="toggleRightPanel('chat')" title="Chat">
         <span>💬</span>
-        <span class="tab-label">Sohbet</span>
+        <span class="tab-label">Chat</span>
       </button>
       <button class="right-tab-btn" id="rtab-history" onclick="toggleRightPanel('history')" title="Tree History">
         <span>🕰️</span>
-        <span class="tab-label">Hıstory</span>
+        <span class="tab-label">History</span>
       </button>
     </div>
 
@@ -284,23 +284,24 @@
         <!-- ── Chat Panel ── -->
         <div class="chat-panel" id="chat-panel">
           <div class="panel-header">
-            <div class="panel-title">💬 Sohbet Geçmişi</div>
+            <div class="panel-title">💬 Chat History</div>
           </div>
+         
           <div class="chat-auth-wall" id="chat-auth-wall">
             <div class="auth-wall-icon">🔒</div>
-            <div class="auth-wall-title">Giriş Gerekiyor</div>
-            <div class="auth-wall-sub">Sohbet geçmişini görüntülemek ve kaydetmek için lütfen hesabınıza giriş yapın.</div>
+            <div class="auth-wall-title">Login Required</div>
+            <div class="auth-wall-sub">Please log in to view and save your chat history.</div>
             <div class="auth-wall-btns">
-              <button class="btn btn-insert btn-full" onclick="openAuthModal()">Giriş Yap</button>
-              <button class="btn btn-secondary btn-full" onclick="openAuthModal('register')">Kayıt Ol</button>
+              <button class="btn btn-insert btn-full" onclick="openAuthModal()">Login</button>
+              <button class="btn btn-secondary btn-full" onclick="openAuthModal('register')">Register</button>
             </div>
           </div>
           <div id="chat-logged-in" style="display:none;flex-direction:column;flex:1;overflow:hidden">
             <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-area">
-              <textarea class="chat-input" id="chat-input" placeholder="Bir soru sorun…" rows="1"
+              <textarea class="chat-input" id="chat-input" placeholder="Ask a question…" rows="1"
                 onkeydown="chatKeyDown(event)"></textarea>
-              <button class="chat-send" onclick="sendChatMessage()" title="Gönder">➤</button>
+              <button class="chat-send" onclick="sendChatMessage()" title="Send">➤</button>
             </div>
           </div>
         </div>
@@ -314,10 +315,10 @@
             </div>
           </div>
           <div class="history-toolbar">
-            <button class="history-toolbar-btn save-now" onclick="saveSnapshot()">📌 Kaydet</button>
-            <button class="history-toolbar-btn clear-all" onclick="clearAllHistory()">🗑 Temizle</button>
+            <button class="history-toolbar-btn save-now" onclick="saveSnapshot()">📌 Save</button>
+            <button class="history-toolbar-btn clear-all" onclick="clearAllHistory()">🗑 Clear</button>
           </div>
-          <div class="history-count" id="history-count">0 snapshot</div>
+          <div class="history-count" id="history-count">0 snapshots</div>
           <div class="history-scroll" id="history-area"></div>
         </div>
 
@@ -329,6 +330,7 @@
 
 <div class="node-tooltip" id="node-tooltip"></div>
 
+<script src="config.js"></script>
 <script src="tree.js"></script>
 </body>
 </html>

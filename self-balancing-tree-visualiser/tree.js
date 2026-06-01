@@ -1014,18 +1014,80 @@ class RBTree {
   }
 
   _rbDelete(z) {
-    let y = z, yOrigColor = y.color, x;
-    if (!z.left) { x = z.right; this._transplant(z, z.right); }
-    else if (!z.right) { x = z.left; this._transplant(z, z.left); }
-    else {
-      y = this._min(z.right); yOrigColor = y.color; x = y.right;
-      if (y.parent === z) { if (x) x.parent = y; }
-      else { this._transplant(y, y.right); y.right = z.right; if (y.right) y.right.parent = y; }
-      this._transplant(z, y);
-      y.left = z.left; if (y.left) y.left.parent = y;
-      y.color = z.color;
+  let y = z, yOrigColor = y.color, x, xParent = null;
+  
+  if (!z.left) {
+    x = z.right; xParent = z.parent;
+    this._transplant(z, z.right);
+  } else if (!z.right) {
+    x = z.left; xParent = z.parent;
+    this._transplant(z, z.left);
+  } else {
+    y = this._min(z.right); yOrigColor = y.color; x = y.right;
+    if (y.parent === z) {
+      xParent = y;
+      if (x) x.parent = y;
+    } else {
+      xParent = y.parent;
+      this._transplant(y, y.right);
+      y.right = z.right;
+      if (y.right) y.right.parent = y;
+    }
+    this._transplant(z, y);
+    y.left = z.left; if (y.left) y.left.parent = y;
+    y.color = z.color;
+  }
+  
+  if (yOrigColor === BLACK) {
+    this._fixDelete(x, xParent);
+  }
+}
+
+_fixDelete(x, xParent) {
+  while (x !== this.root && !this.isRed(x)) {
+    if (!xParent) break;
+    if (x === xParent.left) {
+      let w = xParent.right;
+      if (this.isRed(w)) {
+        w.color = BLACK; xParent.color = RED;
+        this.rotateLeft(xParent); w = xParent.right;
+      }
+      if (!this.isRed(w?.left) && !this.isRed(w?.right)) {
+        if (w) w.color = RED; x = xParent; xParent = x.parent;
+      } else {
+        if (!this.isRed(w?.right)) {
+          if (w?.left) w.left.color = BLACK;
+          if (w) w.color = RED;
+          this.rotateRight(w); w = xParent.right;
+        }
+        if (w) w.color = xParent.color;
+        xParent.color = BLACK;
+        if (w?.right) w.right.color = BLACK;
+        this.rotateLeft(xParent); x = this.root;
+      }
+    } else {
+      let w = xParent.left;
+      if (this.isRed(w)) {
+        w.color = BLACK; xParent.color = RED;
+        this.rotateRight(xParent); w = xParent.left;
+      }
+      if (!this.isRed(w?.right) && !this.isRed(w?.left)) {
+        if (w) w.color = RED; x = xParent; xParent = x.parent;
+      } else {
+        if (!this.isRed(w?.left)) {
+          if (w?.right) w.right.color = BLACK;
+          if (w) w.color = RED;
+          this.rotateLeft(w); w = xParent.left;
+        }
+        if (w) w.color = xParent.color;
+        xParent.color = BLACK;
+        if (w?.left) w.left.color = BLACK;
+        this.rotateRight(xParent); x = this.root;
+      }
     }
   }
+  if (x) x.color = BLACK;
+}
 
   _transplant(u, v) {
     if (!u.parent)                this.root = v;

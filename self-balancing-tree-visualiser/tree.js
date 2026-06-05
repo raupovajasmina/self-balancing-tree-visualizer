@@ -44,7 +44,7 @@ function initAuth() {
 }
 
 function updateAuthUI() {
-  // Auth sistemi kaldırıldı — chat direkt açık
+
   const loggedInArea = document.getElementById('chat-logged-in');
   if (loggedInArea) {
     loggedInArea.style.display = 'flex';
@@ -75,46 +75,7 @@ function switchModalTab(tab) {
   document.getElementById('modal-error').textContent = '';
 }
 
-function submitAuth() {
-  const errEl = document.getElementById('modal-error');
-  errEl.textContent = '';
-  if (modalMode === 'login') {
-    const username = document.getElementById('login-user').value.trim();
-    const password = document.getElementById('login-pass').value;
-    if (!username || !password) { errEl.textContent = 'Tüm alanları doldurun.'; return; }
-    const accounts = JSON.parse(localStorage.getItem('tv-accounts') || '{}');
-    if (!accounts[username] || accounts[username].password !== btoa(password)) {
-      errEl.textContent = 'Kullanıcı adı veya şifre hatalı.'; return;
-    }
-    currentUser = { username, email: accounts[username].email };
-    localStorage.setItem('tv-user', JSON.stringify(currentUser));
-    closeAuthModal();
-    updateAuthUI();
-    addLog(`Hoş geldin, ${username}!`, 'insert');
-    if (!chatHistory[username] || chatHistory[username].length === 0) {
-      addChatMessage('ai', `Merhaba ${username}! 👋 Ağaç veri yapıları hakkında sorularınızı yanıtlamaya hazırım.`);
-    }
-  } else {
-    const username = document.getElementById('reg-user').value.trim();
-    const email    = document.getElementById('reg-email').value.trim();
-    const password = document.getElementById('reg-pass').value;
-    if (!username || !email || !password) { errEl.textContent = 'Tüm alanları doldurun.'; return; }
-    if (username.length < 3) { errEl.textContent = 'Kullanıcı adı en az 3 karakter olmalı.'; return; }
-    if (password.length < 6) { errEl.textContent = 'Şifre en az 6 karakter olmalı.'; return; }
-    const accounts = JSON.parse(localStorage.getItem('tv-accounts') || '{}');
-    if (accounts[username]) { errEl.textContent = 'Bu kullanıcı adı zaten alınmış.'; return; }
-    accounts[username] = { password: btoa(password), email };
-    localStorage.setItem('tv-accounts', JSON.stringify(accounts));
-    currentUser = { username, email };
-    localStorage.setItem('tv-user', JSON.stringify(currentUser));
-    chatHistory[username] = [];
-    saveChats();
-    closeAuthModal();
-    updateAuthUI();
-    addLog(`Kayıt başarılı! Hoş geldin, ${username}!`, 'insert');
-    addChatMessage('ai', `Hesabın oluşturuldu ${username}! 🎉 Sana yardımcı olmaktan mutluluk duyarım.`);
-  }
-}
+
 
 function doLogout() {
   currentUser = null;
@@ -141,8 +102,7 @@ function doLogout() {
     renderPseudoCode('avl');
   }
 
-  updateAuthUI();
-  addLog('Çıkış yapıldı. Tüm ağaçlar sıfırlandı.', 'info');
+  
 
   const msgs = document.getElementById('chat-messages');
   if (msgs) msgs.innerHTML = '';
@@ -192,7 +152,7 @@ function chatKeyDown(e) {
 const GEMINI_API_KEY = CONFIG.GEMINI_API_KEY;
 const GEMINI_MODEL   = 'gemini-2.5-flash-lite';
 
-let conversationHistory = []; // { role: 'user'|'model', parts: [{text}] }
+let conversationHistory = []; 
 
 function getTreeContext() {
   const tree = trees[currentTree];
@@ -219,7 +179,7 @@ async function sendChatMessage() {
   input.value    = '';
   input.disabled = true;
 
-  // Sadece arayüze ekle. API'den başarılı cevap alana kadar kalıcı geçmişe ekleme yapmıyoruz.
+  
   addChatMessage('user', text);
   const newUserMessage = { role: 'user', parts: [{ text }] };
 
@@ -238,7 +198,7 @@ async function sendChatMessage() {
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
-    // Mevcut geçmiş ve yeni mesajı birleştirerek API'ye gönderilecek içeriği oluşturuyoruz
+    
     const payloadContents = [...conversationHistory, newUserMessage];
 
     const response = await fetch(url, {
@@ -257,11 +217,11 @@ async function sendChatMessage() {
 
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (reply) {
-      // DÜZELTME: API'den başarılı cevap geldi. Şimdi hem kullanıcının sorusunu hem de modelin cevabını kalıcı geçmişe ekleyebiliriz.
+      
       conversationHistory.push(newUserMessage);
       conversationHistory.push({ role: 'model', parts: [{ text: reply }] });
 
-      // Geçmiş 20 mesajı aşıyorsa kırp, ancak çift sayı (çift=20) kullanarak dizinin 'user' rolü ile başlamasını garanti altına al.
+      
       if (conversationHistory.length > 20) {
         conversationHistory = conversationHistory.slice(-20);
       }
@@ -275,7 +235,7 @@ async function sendChatMessage() {
     const t = document.getElementById('typing-indicator');
     if (t) t.remove();
     addChatMessage('ai', `⚠️ Bağlantı hatası. İnternet bağlantınızı ve API key'i kontrol edin.`);
-    // Hata durumunda newUserMessage kalıcı conversationHistory'ye eklenmediği için geçmiş bozulmaz.
+    
   } finally {
     input.disabled = false;
     input.focus();
@@ -630,7 +590,7 @@ function deserializeAVL(data) {
   return node;
 }
 
-// ── Stub for history log called from demoRotation ──
+
 function addToHistoryLog(type, label) {
   addLog(label, type);
 }
@@ -819,10 +779,10 @@ insert(val){
     return this.balance(n, steps);
   }
 
-  // Sadece arama — ağaca dokunmaz, snapshot bazlı path adımları üretir
+  
   _searchPath(n, val, steps, currentRoot) {
     if (!n) return false;
-    // Bu node'u turuncu ile highlight'la — ağaç bozulmamış halde göster
+    
     steps.push({
       type: 'visit',
       desc: `${n.val} ziyaret ediliyor`,
@@ -848,7 +808,7 @@ insert(val){
   delete(val) {
     const steps = [{ type: 'info', desc: `${val} AVL ağacında aranıyor`, highlight: [], kind: 'info', avlSnapshot: serializeAVL(this.root) }];
 
-    // Faz 1 — snapshot bazlı arama, ağaca dokunmaz
+    // snapshot bazlı arama
     const found = this._searchPath(this.root, val, steps, this.root);
 
     if (!found) {
@@ -856,13 +816,13 @@ insert(val){
       return steps;
     }
 
-    // Faz 2 — gerçek silme; her adım kendi o-anki ara snapshot'ını taşısın
+    
     const tmpTree = new AVLTree();
     tmpTree.root = deserializeAVL(serializeAVL(this.root));
     const deleteSteps = [];
     tmpTree.root = tmpTree._delete(tmpTree.root, val, deleteSteps, { hit: false });
 
-    // Her adıma o anki FINAL ağaç durumunu yaz (silme tamamlandıktan sonra)
+    
     const finalSnap = serializeAVL(tmpTree.root);
     deleteSteps.forEach(s => { s.finalSnapshot = finalSnap; });
     steps.push(...deleteSteps);
@@ -1098,7 +1058,7 @@ _fixDelete(x, xParent) {
 
   _min(n) { while (n.left) n = n.left; return n; }
 
-  // ── Search: keeps step-by-step path (useful to see) ──
+  // search step by step
   search(val) {
     let steps = [{ type: 'info', desc: `${val} RB ağacında aranıyor`, highlight: [], kind: 'info' }];
     let cur = this.root;
@@ -1419,7 +1379,7 @@ function render(highlights = new Map()) {
       const hlFill     = isHL   ? hlColor   : baseFill;
       const hlStroke   = isHL   ? hlColor   : baseStroke;
 
-      // Highlight ring — only on highlighted nodes
+      
       if (isHL) {
         el.append('circle').attr('r', R + 7)
           .attr('fill', 'none').attr('stroke', hlColor)
@@ -1670,7 +1630,7 @@ function applyStep(step) {
   (step.highlight || []).forEach(id => { if (id) hlMap.set(id, step.kind || 'path'); });
 
   if ('finalSnapshot' in step) {
-    // Kalıcı güncelleme — trees.avl.root gerçekten değişiyor
+    
     trees.avl.root = step.finalSnapshot ? deserializeAVL(step.finalSnapshot) : null;
     render(hlMap);
   } else if ('avlSnapshot' in step) {
@@ -1806,9 +1766,7 @@ document.getElementById('val-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') doInsert();
 });
 
-//document.getElementById('auth-modal').addEventListener('click', function(e) {
-  //if (e.target === this) closeAuthModal();
-//});
+
 
 // ============================================================
 // HISTORY SYSTEM
@@ -1890,7 +1848,7 @@ function autoSnapshot(opName, val) {
 
   if (vals.length === 0) return;
 
-  // Insert sırasını da kaydet (inorder zaten sıralı, biz preorder lazım)
+ 
   const insertOrder = [];
   if (currentTree === 'avl' || currentTree === 'rb') {
     function preorder(n) { if (!n) return; insertOrder.push(n.val); preorder(n.left); preorder(n.right); }
@@ -1941,14 +1899,14 @@ function restoreSnapshot(snapId) {
   const snap = treeHistory.find(s => s.id === snapId);
   if (!snap) return;
 
-  // Önce tree tipini değiştir ve temizle
+  //  tree tipini değiştir ve temizle
   currentTree = snap.treeType;
   trees = { avl: new AVLTree(), rb: new RBTree(), btree: new BTree(2) };
   document.querySelectorAll('.tree-tab').forEach((t, i) => {
     t.classList.toggle('active', ['avl','rb','btree'][i] === snap.treeType);
   });
 
-  // Preorder sırasıyla ekle (ağaç yapısını korur)
+  // Preorder sırasıyla ekle 
   const vals = snap.insertOrder || snap.inorder || [];
   vals.forEach(v => trees[snap.treeType].insert(v));
 
@@ -2098,7 +2056,7 @@ function applyRotation(type) {
     avlSnapshot: snapBefore,
   });
 
-  // Ağaçta o node'u rotasyonla dengele
+
   function rebalanceNode(root, targetId) {
     if (!root) return null;
     if (root.id === targetId) return tree.balance(root, steps);

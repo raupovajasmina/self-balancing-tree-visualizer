@@ -446,7 +446,7 @@ header h1 {
 .right-tab-btn.active { background: linear-gradient(135deg, var(--grd1), var(--grd2)); color: #fff; box-shadow: 0 2px 10px rgba(124,109,250,0.35); }
 .right-tab-btn:hover:not(.active) { background: var(--card); color: var(--text); border: 1px solid var(--border); }
 
-/* ── FIX: min-height:0 kritik — flex scroll için zorunlu ── */
+/* ── FIX: min-height:0  */
 .right-panel-content {
   width: 0;
   overflow: hidden;
